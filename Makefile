@@ -1,7 +1,7 @@
 BINARIES = root2postgres
 OBJECTS = #TupleReader.o
 
-BOOST_ROOT = /usr/local/boost_1_56_0
+BOOST_ROOT = /usr/local/boost_1_59_0
 BOOST_LIBS = $(BOOST_ROOT)/stage/lib
 LIBS = -lboost_program_options
 
