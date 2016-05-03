@@ -34,6 +34,7 @@ class TupleReader {
     int GetVarInt(std::string var_name) const;
     float GetVarFloat(std::string var_name) const;
     std::vector<int> GetVarVectorInts(std::string var_name) const;
+    std::vector<float> GetVarVectorFloats(std::string var_name) const;
 
   private:
     TFile *root_file_;
@@ -46,6 +47,7 @@ class TupleReader {
     std::map<std::string, int> var_values_int_;
     std::map<std::string, float> var_values_float_;
     std::map<std::string, std::vector<int>> var_values_vec_ints_;
+    std::map<std::string, std::vector<float>> var_values_vec_floats_;
 
     int current_event_idx_ = 0;
     int num_events_ = 0;

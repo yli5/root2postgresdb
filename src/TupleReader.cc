@@ -32,7 +32,7 @@ TupleReader::~TupleReader() {
 
 void TupleReader::SetAddresses() {
   for (auto t : var_types_) {
-    if (t != "int" && t != "float" && t != "int[]")
+    if (t != "int" && t != "float" && t != "int[]" && t != "float[]")
       throw std::invalid_argument("SetAddresses error: "
                                   "var_types Must be one of" 
                                   "int, float, int[], or float[].");
@@ -47,6 +47,9 @@ void TupleReader::SetAddresses() {
       } else if (t == "int[]") {
         var_values_vec_ints_.insert(make_pair(v, vector<int>(500)));
         root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_ints_[v][0]);
+      } else if (t == "float[]") {
+        var_values_vec_floats_.insert(make_pair(v, vector<float>(500)));
+        root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_floats_[v][0]);
       } 
     }
   }
@@ -83,6 +86,15 @@ vector<int> TupleReader::GetVarVectorInts(string var_name) const {
     throw std::domain_error("GetVarVectorInts error: "
                             "No such variable, only those in var_names are allowed.");
   vector<int> var_vector = var_values_vec_ints_.at(var_name);
+  var_vector.resize(get_array_length(var_name));
+  return var_vector;
+}
+
+vector<float> TupleReader::GetVarVectorFloats(string var_name) const {
+  if (var_values_vec_floats_.count(var_name) == 0)
+    throw std::domain_error("GetVarVectorFloats error: "
+                            "No such variable, only those in var_names are allowed.");
+  vector<float> var_vector = var_values_vec_floats_.at(var_name);
   var_vector.resize(get_array_length(var_name));
   return var_vector;
 }
