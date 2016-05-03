@@ -6,6 +6,8 @@
 #include <chrono>
 #include <algorithm>
 
+#include <TupleReader.h>
+
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
