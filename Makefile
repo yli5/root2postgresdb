@@ -66,7 +66,7 @@ $(DEPDIR)/%.d: ;
 -include $(patsubst %,$(DEPDIR)/%.d,$(notdir $(basename $(SRCS))))
 
 clean : 
-	@rm -f *~ $(BINARIES) $(BUILDDIR)/*
+	@rm -f *~ $(BINARIES) $(LIBDIR)/* $(BUILDDIR)/*
 
 cleanall : clean
 	@rm -f $(DEPDIR)/*
