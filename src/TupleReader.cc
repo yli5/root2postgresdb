@@ -54,7 +54,8 @@ bool TupleReader::next_record() {
       return true;
     }
     else
-      throw std::out_of_range("GetEntry error: either entry doesn't exist or I/O error.");
+      throw std::out_of_range("GetEntry error: either entry doesn't exist or"
+                              "I/O error.");
   }
   return false;
 }
