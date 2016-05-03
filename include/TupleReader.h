@@ -24,6 +24,7 @@ class TupleReader {
   public:
     TupleReader(std::vector<std::string> var_types, 
                 std::map<std::string, std::vector<std::string>> var_names,
+                std::map<std::string, std::string> var_lengths,
                 std::string root_filename,
                 std::string root_treename);
     ~TupleReader();
@@ -32,6 +33,7 @@ class TupleReader {
 
     int GetVarInt(std::string var_name) const;
     float GetVarFloat(std::string var_name) const;
+    std::vector<int> GetVarVectorInts(std::string var_name) const;
 
   private:
     TFile *root_file_;
@@ -39,13 +41,17 @@ class TupleReader {
 
     std::vector<std::string> var_types_;
     std::map<std::string, std::vector<std::string>> var_names_;
+    std::map<std::string, std::string> var_lengths_;
+
     std::map<std::string, int> var_values_int_;
     std::map<std::string, float> var_values_float_;
+    std::map<std::string, std::vector<int>> var_values_vec_ints_;
 
     int current_event_idx_ = 0;
     int num_events_ = 0;
 
     void SetAddresses();
+    size_t get_array_length(std::string var_name) const;
 };
 
 #endif
