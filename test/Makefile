@@ -11,11 +11,16 @@ LIBDIR = ../lib
 # external dependencies
 # ---------------------
 
+# root2postgres
+INCFLAGS += -I$(INCDIR)
+LDFLAGS = -L$(LIBDIR) -Wl,-rpath,$(LIBDIR) -lroot2postgres
+
 # Boost
 BOOST_ROOT = /usr/local/boost_1_59_0
-BOOST_LIBS = $(BOOST_ROOT)/stage/lib
-INCFLAGS = -I$(BOOST_ROOT)
-LDFLAGS = -L$(BOOST_LIBS) -Wl,-rpath,$(BOOST_LIBS) -lboost_program_options -lboost_regex
+BOOST_LIBDIR = $(BOOST_ROOT)/stage/lib
+BOOST_LIBS = -lboost_program_options -lboost_regex
+INCFLAGS += -I$(BOOST_ROOT)
+LDFLAGS += -L$(BOOST_LIBDIR) -Wl,-rpath,$(BOOST_LIBDIR) $(BOOST_LIBS)
 
 # Postgre 
 INCFLAGS += -I/usr/pgsql-9.4/include
@@ -25,10 +30,6 @@ LDFLAGS += -L/usr/pgsql-9.4/lib -lpq
 CERNROOT_ROOT = $(ROOTSYS)
 INCFLAGS += -I$(shell $(CERNROOT_ROOT)/bin/root-config --incdir)
 LDFLAGS += $(shell $(CERNROOT_ROOT)/bin/root-config --libs)
-
-# root2postgres
-INCFLAGS += -I$(INCDIR)
-LDFLAGS += -L$(LIBDIR) -lroot2postgres
 
 # build rules
 # -----------
