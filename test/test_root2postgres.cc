@@ -60,6 +60,7 @@ int main() {
       //cout << endl;
       cout << " has mcLen = " << tr.GetVarInt("mcLen");
       cout << ", R2 = " << tr.GetVarFloat("R2");
+      cout << endl;
       cout << "      The mcLund are :";
       for (const auto &m : tr.GetVarVectorInts("mcLund"))
         cout << m << " ";
