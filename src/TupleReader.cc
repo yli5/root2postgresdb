@@ -1,3 +1,25 @@
+// The TupleReader class contains data members that store three attributes
+// of each variable: its name, type, and length (if it is an array type).
+//
+// The purpose of the class is to load the variables specified by
+// the ColumnConfigParser class into the memory so that the PostgresConnector
+// can insert them into the database one row at a time.
+//
+// The following briefly describes how the data members are orgainzed:
+//
+// var_types_: A vector summarizing the valid data types present 
+// in the config file.  Valid types are: int, float, int[], and float[].
+// Example: {"int", "float[]"}
+//
+// var_names_: A map that associates each types in var_types_ with a vector
+// containing the names of variables of that type.
+// Example: {{"int", {"mcLen", "nY"}}, {"float[]", {"mcenergyCM"}}} 
+//
+// var_lengths_: A map that associates an array variable (int or float) with
+// the integer variable representing its length.  The latter must be specified
+// in the config file.
+// Example: {{"mcenergyCM", "mcLen"}}
+
 #include <iostream>
 #include <utility>
 #include <exception>
@@ -38,6 +60,8 @@ TupleReader::~TupleReader() {
 // SetAddresses() performs type checking of the variable and allocates
 // memory for the variable.  Then, it associates that location with
 // a branch in the ROOT file through TBranch::SetBranchAddress.
+// If no such branch exists, SetBranchAddress will return
+// TTree::ESetBranchAddressStatus::kMissingBranch.
 
 void TupleReader::SetAddresses() {
   for (auto t : var_types_) {
@@ -49,16 +73,32 @@ void TupleReader::SetAddresses() {
     for (auto v : var_names_[t]) {
       if (t == "int") {
         var_values_int_.insert(make_pair(v, 0));
-        root_tree_->SetBranchAddress(v.c_str(), &var_values_int_[v]);
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_int_[v])
+            == TTree::ESetBranchAddressStatus::kMissingBranch) {
+          throw std::invalid_argument("TupleReader error: no corresponding "
+                                   "branch in the ROOT file. ");
+        }
       } else if (t == "float") {
         var_values_float_.insert(make_pair(v, 0.));
-        root_tree_->SetBranchAddress(v.c_str(), &var_values_float_[v]);
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_float_[v])
+            == TTree::ESetBranchAddressStatus::kMissingBranch) {
+          throw std::invalid_argument("TupleReader error: no corresponding "
+                                   "branch in the ROOT file. ");
+        }
       } else if (t == "int[]") {
         var_values_vec_ints_.insert(make_pair(v, vector<int>(500)));
-        root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_ints_[v][0]);
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_ints_[v][0])
+            == TTree::ESetBranchAddressStatus::kMissingBranch) {
+          throw std::invalid_argument("TupleReader error: no corresponding "
+                                   "branch in the ROOT file. ");
+        }
       } else if (t == "float[]") {
         var_values_vec_floats_.insert(make_pair(v, vector<float>(500)));
-        root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_floats_[v][0]);
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_floats_[v][0])
+            == TTree::ESetBranchAddressStatus::kMissingBranch) {
+          throw std::invalid_argument("TupleReader error: no corresponding "
+                                   "branch in the ROOT file. ");
+        }
       } 
     }
   }
@@ -84,21 +124,21 @@ bool TupleReader::next_record() {
 // Accessors and their helper function, which performs checks to make sure that
 // the variable being accessed exists and is of the right type.
 
-int TupleReader::GetVarInt(string var_name) const {
+int TupleReader::GetVarInt(const string &var_name) const {
   if (var_values_int_.count(var_name) == 0)
     throw std::domain_error("GetVarInt error: "
                             "No such variable, only those in var_names are allowed.");
   return var_values_int_.at(var_name);
 }
 
-float TupleReader::GetVarFloat(string var_name) const {
+float TupleReader::GetVarFloat(const string &var_name) const {
   if (var_values_float_.count(var_name) == 0)
     throw std::domain_error("GetVarFloat error: "
                             "No such variable, only those in var_names are allowed.");
   return var_values_float_.at(var_name);
 }
 
-vector<int> TupleReader::GetVarVectorInts(string var_name) const {
+vector<int> TupleReader::GetVarVectorInts(const string &var_name) const {
   if (var_values_vec_ints_.count(var_name) == 0)
     throw std::domain_error("GetVarVectorInts error: "
                             "No such variable, only those in var_names are allowed.");
@@ -107,7 +147,7 @@ vector<int> TupleReader::GetVarVectorInts(string var_name) const {
   return var_vector;
 }
 
-vector<float> TupleReader::GetVarVectorFloats(string var_name) const {
+vector<float> TupleReader::GetVarVectorFloats(const string &var_name) const {
   if (var_values_vec_floats_.count(var_name) == 0)
     throw std::domain_error("GetVarVectorFloats error: "
                             "No such variable, only those in var_names are allowed.");
@@ -116,7 +156,7 @@ vector<float> TupleReader::GetVarVectorFloats(string var_name) const {
   return var_vector;
 }
 
-size_t TupleReader::get_array_length(string var_name) const {
+size_t TupleReader::get_array_length(const string &var_name) const {
   if (var_lengths_.count(var_name) == 0)
     throw std::domain_error("get_array_length error: "
                             "No such array variable, it must exist in var_lengths.");

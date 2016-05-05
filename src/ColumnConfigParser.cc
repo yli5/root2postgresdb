@@ -1,3 +1,12 @@
+// The purpose of this class is to translate the column specification
+// file into a format requested by the TupleReader class. You can read
+// more about the format in TupleReader.cc.
+//
+// While this class checks for the correct format of the columns and 
+// the consistency of array variable lengths, it does not check whether
+// such variables exist in the ROOT file, it is handled by ROOT as
+// described in TupleReader.cc. 
+
 #include <ColumnConfigParser.h>
 #include <fstream>
 #include <exception>
@@ -12,7 +21,7 @@ using std::regex;
 using std::smatch;
 using std::regex_search;
 
-ColumnConfigParser::ColumnConfigParser(string column_spec_fname) {
+ColumnConfigParser::ColumnConfigParser(const string &column_spec_fname) {
 
   // Read in the column specification file
   std::ifstream fs(column_spec_fname);

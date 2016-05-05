@@ -1,3 +1,17 @@
+// TupleReader reads in a root file based on the configuration
+// passed on by a ColumnConfigParser (CCP) object.
+// It handles the memory allocation so that one can access the
+// available variables through one of the 4 accessors.
+//
+// While the ColumnConfigParser class has its own exception handling,
+// the TupleReader class performs its own checks to make sure
+// the variables are valid.  Read more about the allowed types
+// in the ColumnConfigParser header file.
+//
+// Suggested way to instantiate a TupleReader object is to directly
+// call accessor functions of CCP: GetVarTypes(), GetVarNames(),
+// and GetVarLengths(). (see example_usage.cc)
+
 #ifndef TUPLE_READER_H
 #define TUPLE_READER_H
 
@@ -11,22 +25,8 @@
 #include <TTree.h>
 
 class TupleReader {
+
   public:
-    
-    // TupleReader reads in a root file based on the configuration
-    // passed on by a ColumnConfigParser (CCP) object.
-    // It handles the memory allocation so that one can access the
-    // available variables through one of the 4 accessors.
-    //
-    // While the ColumnConfigParser has its own exception handling,
-    // the TupleReader class performs its own checks to make sure
-    // the variables are valid.  Read more about the allowed types
-    // in the ColumnConfigParser header file.
-    //
-    // Suggested way to instantiate a TupleReader object is to directly
-    // call accessor functions of CCP: GetVarTypes(), GetVarNames(),
-    // and GetVarLengths().
-    
     TupleReader(std::vector<std::string> var_types, 
                 std::map<std::string, std::vector<std::string>> var_names,
                 std::map<std::string, std::string> var_lengths,
@@ -43,10 +43,10 @@ class TupleReader {
 
     // Accessors for the variables, currently only 4 supported types.
     
-    int GetVarInt(std::string var_name) const;
-    float GetVarFloat(std::string var_name) const;
-    std::vector<int> GetVarVectorInts(std::string var_name) const;
-    std::vector<float> GetVarVectorFloats(std::string var_name) const;
+    int GetVarInt(const std::string &var_name) const;
+    float GetVarFloat(const std::string &var_name) const;
+    std::vector<int> GetVarVectorInts(const std::string &var_name) const;
+    std::vector<float> GetVarVectorFloats(const std::string &var_name) const;
 
   private:
     TFile *root_file_;
@@ -65,7 +65,7 @@ class TupleReader {
     int num_events_ = 0;
 
     void SetAddresses();
-    size_t get_array_length(std::string var_name) const;
+    size_t get_array_length(const std::string &var_name) const;
 };
 
 #endif
