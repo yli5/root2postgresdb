@@ -3,53 +3,103 @@
 #include <exception>
 #include <set>
 #include <utility>
+#include <regex>
 #include <boost/algorithm/string.hpp>
 
 using std::string;
 using std::vector;
+using std::regex;
+using std::smatch;
+using std::regex_search;
 
 ColumnConfigParser::ColumnConfigParser(string column_spec_fname) {
+
+  // Read in the column specification file
   std::ifstream fs(column_spec_fname);
   string line;
 
   if (!fs) {
     throw std::invalid_argument("Error in opening column_spec_fname. ");
   }
+
   std::set<string> var_types_set;
   vector<string> contents;
   string var_type;
   string var_name;
 
   while (std::getline(fs, line)) {
-    boost::split(contents, line, boost::is_any_of(" "));
 
+    // Tokenize each line and validiate the 2-column format
+    boost::split(contents, line, boost::is_any_of(" "));
     if (contents.size() != 2)
       throw std::domain_error("Column spec file does not contain "
                               "exactly 2 columns. ");
     var_name = contents[0];
     var_type = contents[1];
-    auto opening_bracket_pos = var_type.find('[');
-    auto closing_bracket_pos = var_type.find(']');
 
-    if (opening_bracket_pos == string::npos &&
-        closing_bracket_pos == string::npos) {
+    // Regex search patterns to determine name and type
+    // Currently type can be one of {int, float, int[], float[]}
+    string name_pattern = "[[:alpha:]_][[:alnum:]_]*";
+    string type_scalar_pattern = "^(int|float)$";
+    string type_array_prefix_pattern = "^(int|float)";
+    string type_array_length_pattern = "\\[" + name_pattern + "\\]$";
+    string type_array_pattern = type_array_prefix_pattern + type_array_length_pattern;
+   
+    // Smatch objects to hold the regex search result
+    smatch result_prefix, result_suffix, result_length;
+
+    // Check if variable name is valid
+    if (!regex_match(var_name, regex(name_pattern))) {
+      throw std::domain_error("ColumnConfigParser error: invalid variable name. ");
+    }
+
+    // Check if variable type is valid
+    if (regex_match(var_type, regex(type_scalar_pattern))) {
+      // Scalar variable
       var_types_set.insert(var_type);
       var_names_[var_type].push_back(var_name);
-    } else if (opening_bracket_pos < var_type.size() &&
-               closing_bracket_pos == var_type.size() - 1){
-      string array_var_type = var_type.substr(0, opening_bracket_pos);
-      string array_var_length = var_type.substr(opening_bracket_pos + 1,
-                                                closing_bracket_pos - opening_bracket_pos - 1);
-      var_type = array_var_type + "[]";
-      var_types_set.insert(var_type);
-      var_names_[var_type].push_back(var_name);
-      var_lengths_.insert(std::make_pair(var_name, array_var_length));
-    } else { 
-      throw std::domain_error("Variable type must be one of: "
-                              "int, float, int[], float[]. ");
+
+    } else if (regex_match(var_type, regex(type_array_pattern))) {
+      // Array variable
+      // Determine whether it is a int[] or a float[]
+      regex_search(var_type, result_prefix, regex(type_array_prefix_pattern));
+      string array_var_type = result_prefix.str() + "[]";
+      var_types_set.insert(array_var_type);
+      var_names_[array_var_type].push_back(var_name);
+
+      // Determine the variable corresponding to its length
+      regex_search(var_type, result_suffix, regex(type_array_length_pattern));
+      regex_search(result_suffix.str(), result_length, regex(name_pattern));
+      var_lengths_.insert(std::make_pair(var_name, result_length.str()));
+
+    } else {
+      throw std::domain_error("ColumnConfigParser error: invalid variable type. ");
     }
   }
+
+  // TupleReader expects var_types_ to be a vector
   var_types_ = vector<string>(var_types_set.begin(), var_types_set.end());
+
+  // Check that lengths of array variables are valid
+  vector<string> int_var_names = var_names_.at("int");
+  bool is_valid_length;
+  for (const auto p : var_lengths_) {
+    is_valid_length = false;
+    for (const auto v : int_var_names) {
+      if (p.second == v) is_valid_length = true;
+    }
+    if (!is_valid_length) {
+      throw std::domain_error("ColumnConfigParser error: invalid array length. ");
+    }
+  }
 }
 
-ColumnConfigParser::~ColumnConfigParser() {}
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,6 @@
 // ConfigParser is a class that parses the column configuration
 // file and stores the appropriate information (variables names,
-// type, and length).
-// It is meant to be used to instantiate the TupleReader object.
+// type, and length) to be passed on to the TupleReader class.
 
 #ifndef COLUMN_CONFIG_PARSER_H
 #define COLUMN_CONFIG_PARSER_H
@@ -12,18 +11,42 @@
 
 class ColumnConfigParser {
   public:
-    ColumnConfigParser(std::string column_spec_fname);
-    ~ColumnConfigParser();
+    // Every ColumnConfigParser object must be instantiated using
+    // a column specification file (e.g. column_config.csv), which
+    // is a space-separated file with 2 columns:
+    //
+    // First column: Name of the variable, composed of alphanumeric
+    // symbols and underscore (_).  First character cannot be a
+    // number.
+    //
+    // Second column: Type of the variable.  Currently supports
+    // 4 types: int, float, int[], and float[].  The array variables
+    // are variable-length arrays, with their lengths determined by
+    // an integer variable that exists in the same spec file.
+    // 
+    // Example of column spec file (no comments allowed):
+    //
+    // mcLen         int
+    // R2            float
+    // mcLund        int[mcLen]
+    // mcenergyCM    float[mcLen]
+    // 
+    // Make sure that if you specify an array variable, its length
+    // is another variable within the same file!
 
-    inline std::vector<std::string> GetVarTypes() const {
+    ColumnConfigParser(std::string column_spec_fname);
+    ~ColumnConfigParser() { };
+
+    // Accessors for the data members to be passed to TupleReader
+    std::vector<std::string> GetVarTypes() const {
       return var_types_;
     }
 
-    inline std::map<std::string, std::vector<std::string>> GetVarNames() const {
+    std::map<std::string, std::vector<std::string>> GetVarNames() const {
       return var_names_;
     }
 
-    inline std::map<std::string, std::string> GetVarLengths() const {
+    std::map<std::string, std::string> GetVarLengths() const {
       return var_lengths_;
     }
 

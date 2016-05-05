@@ -2,6 +2,7 @@
 #include <utility>
 #include <exception>
 #include "TupleReader.h"
+
 //ROOT Headers
 #include <TBranch.h>
 
@@ -11,6 +12,8 @@ using std::vector;
 using std::string;
 using std::map;
 using std::make_pair;
+
+// Constructor definition
 
 TupleReader::TupleReader(vector<string> var_types,
                          map<string, vector<string>> var_names, 
@@ -25,10 +28,16 @@ TupleReader::TupleReader(vector<string> var_types,
   SetAddresses();
 }
 
+// Destructor definition
+
 TupleReader::~TupleReader() {
   root_file_->Close();
   delete root_file_;
 }
+
+// SetAddresses() performs type checking of the variable and allocates
+// memory for the variable.  Then, it associates that location with
+// a branch in the ROOT file through TBranch::SetBranchAddress.
 
 void TupleReader::SetAddresses() {
   for (auto t : var_types_) {
@@ -55,6 +64,10 @@ void TupleReader::SetAddresses() {
   }
 }
 
+// next_record() populates the specified locations in the memory with the 
+// appropriate values from the ROOT file. It starts from the first row and
+// returns true until EOF. 
+
 bool TupleReader::next_record() {
   if (current_event_idx_ < num_events_) {
     if (root_tree_->GetEntry(current_event_idx_) > 0) {
@@ -66,6 +79,10 @@ bool TupleReader::next_record() {
   }
   return false;
 }
+
+
+// Accessors and their helper function, which performs checks to make sure that
+// the variable being accessed exists and is of the right type.
 
 int TupleReader::GetVarInt(string var_name) const {
   if (var_values_int_.count(var_name) == 0)

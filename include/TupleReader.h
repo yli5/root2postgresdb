@@ -1,13 +1,3 @@
-// This class accepts a vector of strings containing variable names
-// for integer columns in the ROOT files.
-// It allocates appropriate memories using SetBranchAddress and 
-// retains a map from the name to memory location.
-// It also provides a next_record() method that calls GetEntry(i),
-// which loads the specified variables from the ROOT file into the
-// memory allocated previously. 
-// Lastly, it provides a get function, which accepts the name of 
-// the variables and returns a pointer to the memory, to be passed
-// to the inserter to the database.
 #ifndef TUPLE_READER_H
 #define TUPLE_READER_H
 
@@ -22,6 +12,21 @@
 
 class TupleReader {
   public:
+    
+    // TupleReader reads in a root file based on the configuration
+    // passed on by a ColumnConfigParser (CCP) object.
+    // It handles the memory allocation so that one can access the
+    // available variables through one of the 4 accessors.
+    //
+    // While the ColumnConfigParser has its own exception handling,
+    // the TupleReader class performs its own checks to make sure
+    // the variables are valid.  Read more about the allowed types
+    // in the ColumnConfigParser header file.
+    //
+    // Suggested way to instantiate a TupleReader object is to directly
+    // call accessor functions of CCP: GetVarTypes(), GetVarNames(),
+    // and GetVarLengths().
+    
     TupleReader(std::vector<std::string> var_types, 
                 std::map<std::string, std::vector<std::string>> var_names,
                 std::map<std::string, std::string> var_lengths,
@@ -29,8 +34,15 @@ class TupleReader {
                 std::string root_treename);
     ~TupleReader();
 
+    // next_record() is a wrapper of the TTree::GetEntry(i) function,
+    // which populates the locations in the memory specified by the 
+    // SetAddresses() function so that the variables can be retrieved
+    // using the accessors.
+    
     bool next_record();
 
+    // Accessors for the variables, currently only 4 supported types.
+    
     int GetVarInt(std::string var_name) const;
     float GetVarFloat(std::string var_name) const;
     std::vector<int> GetVarVectorInts(std::string var_name) const;
