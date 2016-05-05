@@ -112,7 +112,7 @@ void root2postgres(const po::variables_map &vm) {
   std::cout << cernroot_fname << std::endl;
   std::cout << cernroot_trname << std::endl;
 
-  /** Ideal usage example pseudo code 
+  /*// Ideal usage example pseudo code 
 
   // parse column configuration
   ColumnConfigParser col_config(column_spec_fname);
@@ -137,7 +137,6 @@ void root2postgres(const po::variables_map &vm) {
     //   conn.insert(colname, tuple_reader.get(colname));
     // }
   }
-
   */
 
   return;

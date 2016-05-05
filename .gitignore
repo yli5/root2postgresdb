@@ -1,3 +1,4 @@
+root2postgres
 *.o
 *.so
 *.a
