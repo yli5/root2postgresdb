@@ -5,7 +5,7 @@
 BINARIES = root2postgres
 
 # objects to package into the shared library
-OBJECTS = TupleReader.o
+OBJECTS = TupleReader.o ColumnConfigParser.o
 
 # local directory settings and library name
 INCDIR = include
@@ -13,15 +13,16 @@ LIBDIR = lib
 LIBNAME = libroot2postgres.so
 
 INCFLAGS = -I$(INCDIR)
-LDFLAGS = -L$(LIBDIR) -lroot2postgres
+LDFLAGS = -L$(LIBDIR) -Wl,-rpath,$(LIBDIR) -lroot2postgres
 
 # external dependencies
 # ---------------------
 
 BOOST_ROOT = /usr/local/boost_1_59_0
-BOOST_LIBS = $(BOOST_ROOT)/stage/lib
+BOOST_LIBDIR = $(BOOST_ROOT)/stage/lib
+BOOST_LIBS = -lboost_program_options -lboost_regex
 INCFLAGS += -I$(BOOST_ROOT)
-LDFLAGS += -L$(BOOST_LIBS) -Wl,-rpath,$(BOOST_LIBS) -lboost_program_options
+LDFLAGS += -L$(BOOST_LIBDIR) -Wl,-rpath,$(BOOST_LIBDIR) $(BOOST_LIBS)
 
 CERNROOT_ROOT = $(ROOTSYS)
 INCFLAGS += -I$(shell $(CERNROOT_ROOT)/bin/root-config --incdir)
