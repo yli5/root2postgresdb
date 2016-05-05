@@ -12,14 +12,15 @@
 #include <exception>
 #include <set>
 #include <utility>
-#include <regex>
+#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
 using std::string;
 using std::vector;
-using std::regex;
-using std::smatch;
-using std::regex_search;
+using boost::regex;
+using boost::smatch;
+using boost::regex_search;
+using boost::regex_match;
 
 ColumnConfigParser::ColumnConfigParser(const string &column_spec_fname) {
 
@@ -48,11 +49,11 @@ ColumnConfigParser::ColumnConfigParser(const string &column_spec_fname) {
 
     // Regex search patterns to determine name and type
     // Currently type can be one of {int, float, int[], float[]}
-    string name_pattern = "[[:alpha:]_][[:alnum:]_]*";
-    string type_scalar_pattern = "^(int|float)$";
-    string type_array_prefix_pattern = "^(int|float)";
-    string type_array_length_pattern = "\\[" + name_pattern + "\\]$";
-    string type_array_pattern = type_array_prefix_pattern + type_array_length_pattern;
+    const string name_pattern = "[[:alpha:]_][[:alnum:]_]*";
+    const string type_scalar_pattern = "^(int|float)$";
+    const string type_array_prefix_pattern = "^(int|float)";
+    const string type_array_length_pattern = "\\[" + name_pattern + "\\]$";
+    const string type_array_pattern = type_array_prefix_pattern + type_array_length_pattern;
    
     // Smatch objects to hold the regex search result
     smatch result_prefix, result_suffix, result_length;

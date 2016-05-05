@@ -15,7 +15,7 @@ LIBDIR = ../lib
 BOOST_ROOT = /usr/local/boost_1_59_0
 BOOST_LIBS = $(BOOST_ROOT)/stage/lib
 INCFLAGS = -I$(BOOST_ROOT)
-LDFLAGS = -L$(BOOST_LIBS) -Wl,-rpath,$(BOOST_LIBS) -lboost_program_options
+LDFLAGS = -L$(BOOST_LIBS) -Wl,-rpath,$(BOOST_LIBS) -lboost_program_options -lboost_regex
 
 # Postgre 
 INCFLAGS += -I/usr/pgsql-9.4/include

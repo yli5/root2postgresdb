@@ -21,7 +21,7 @@ LDFLAGS = -L$(LIBDIR) -lroot2postgres
 BOOST_ROOT = /usr/local/boost_1_59_0
 BOOST_LIBS = $(BOOST_ROOT)/stage/lib
 INCFLAGS += -I$(BOOST_ROOT)
-LDFLAGS += -L$(BOOST_LIBS) -Wl,-rpath,$(BOOST_LIBS) -lboost_program_options
+LDFLAGS += -L$(BOOST_LIBS) -Wl,-rpath,$(BOOST_LIBS) -lboost_program_options -lboost_regex
 
 CERNROOT_ROOT = $(ROOTSYS)
 INCFLAGS += -I$(shell $(CERNROOT_ROOT)/bin/root-config --incdir)

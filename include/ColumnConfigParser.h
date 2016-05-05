@@ -7,7 +7,7 @@
 // is a space-separated file with 2 columns:
 //
 // First column: Name of the variable, composed of alphanumeric
-// symbols and underscore (_).  First character cannot be a
+// character and underscore (_).  First character cannot be a
 // number.
 //
 // Second column: Type of the variable.  Currently supports
