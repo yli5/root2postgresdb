@@ -1,4 +1,0 @@
-mcLen int
-R2 float
-mcLund int[mcLen]
-mcenergyCM float[mcLen]

@@ -5,7 +5,7 @@
 BINARIES = root2postgres
 
 # objects to package into the shared library
-OBJECTS = TupleReader.o ColumnConfigParser.o
+OBJECTS = TupleReader.o
 
 # local directory settings and library name
 INCDIR = include
