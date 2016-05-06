@@ -8,7 +8,11 @@
 using namespace std;
 
 int main(){
-	PostgresConnector conn("darkphoton", "test");
+
+	//constructor and destroctor test:
+	//PostgresConnector conn("darkphoton", "test");
+	
+	//insert test:
 	conn.regis();
 	conn.insert("mcLen","3");
 	conn.insert("mass", "0.4523");
