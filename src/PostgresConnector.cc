@@ -35,6 +35,6 @@ void PostgresConnector::exec(){
 	std::string command_exec_;
 	command_exec_ = command_column_ + command_value_;
 	res_ = PQexec(conn, command_exec_.c_str());
-	if(PQresultStatus(res) != PGRES_COMMAND_OK)
-		throw PQresultErrorMessage(res);
+	if(PQresultStatus(res_) != PGRES_COMMAND_OK)
+		throw PQresultErrorMessage(res_);
 }
