@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include "PostgresConnector.h"
 
 using namespace std;
 
@@ -23,6 +24,8 @@ int main() {
   // Instantiate a TupleReader object.
   TupleReader tr(root_filename, root_treename, ccp);
 
+  //Instantiate a PostgresConnector object.
+  PostgresConnector conn("darkphoton", "test_postgresconnector");
 
   // Loop through every event in the ROOT file and for each event,
   // access the variables declared in the column config file and
@@ -52,7 +55,15 @@ int main() {
       cout << endl;
       cout << endl;
     }
+    conn.regis();
+    conn.insert("mcLen", tr.get("mcLen"));
+    conn.insert("R2", tr.get("R2"));
+    conn.insert("mcLund", tr.get("mcLund"));
+    conn.insert("mcLund", tr.get("mcenergyCM"));
+    conn.exec();
+
     idx++;
+
   }
 
   return 0;
