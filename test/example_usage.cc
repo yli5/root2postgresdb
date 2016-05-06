@@ -44,6 +44,7 @@ int main() {
   cout << endl << endl;;
 
   while (tr.next_record()) {
+
     if (idx % 100 == 0) {
       cout << "Event #" << idx;
       cout << " has mcLen = " << tr.get("mcLen");
@@ -55,6 +56,7 @@ int main() {
       cout << endl;
       cout << endl;
     }
+
     conn.regis();
     conn.insert("mcLen", tr.get("mcLen"));
     conn.insert("R2", tr.get("R2"));
@@ -63,7 +65,6 @@ int main() {
     conn.exec();
 
     idx++;
-
   }
 
   return 0;
