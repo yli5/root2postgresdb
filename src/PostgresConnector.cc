@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <libpq-fe.h>
+#include "PostgresConnector.h"
 
 PostgresConnector::PostgresConnector(std::string db_name, std::string table_name){
 	db_name_ = db_name;
