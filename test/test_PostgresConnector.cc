@@ -5,7 +5,7 @@
 #include <iostream>
 
 
-using namespac std;
+using namespace std;
 
 int main(){
 	PostgresConnector conn("darkphoton", "test");
