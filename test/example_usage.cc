@@ -25,7 +25,7 @@ int main() {
   TupleReader tr(root_filename, root_treename, ccp);
 
   //Instantiate a PostgresConnector object.
-  PostgresConnector conn("darkphoton", "test_postgresconnector");
+  PostgresConnector conn("darkphoton", "test_postgresconnector", ccp.GetVarNames());
 
   // Loop through every event in the ROOT file and for each event,
   // access the variables declared in the column config file and

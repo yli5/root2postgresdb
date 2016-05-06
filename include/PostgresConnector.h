@@ -9,7 +9,9 @@
 class PostgresConnector{
 public:
 PostgresConnector() = default;
-PostgresConnector(std::string db_name, std::string table_name);
+PostgresConnector(std::string db_name,
+                  std::string table_name, 
+                  std::vector<std::string> var_names);
 ~PostgresConnector();
 
 void regis();
