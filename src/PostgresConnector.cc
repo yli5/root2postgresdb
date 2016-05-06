@@ -8,9 +8,9 @@
 PostgresConnector::PostgresConnector(std::string db_name, std::string table_name){
 	db_name_ = db_name;
 	table_name_ = table_name;
-	conn = PQsetdbLogin(pghost_, pgport_, pgoptions_, pgtty_, db_name_.c_str(), login_, pwd_);	
-	if(PQstatus(conn) != CONNECTION_OK)
-		throw PQerrorMessage(conn);
+	conn_ = PQsetdbLogin(pghost_, pgport_, pgoptions_, pgtty_, db_name_.c_str(), login_, pwd_);	
+	if(PQstatus(conn_) != CONNECTION_OK)
+		throw PQerrorMessage(conn_);
 }
 
 PostgresConnector::~PostgresConnector(){
@@ -35,7 +35,7 @@ void PostgresConnector::exec(){
 	command_value_ += ");"
 	std::string command_exec_;
 	command_exec_ = command_column_ + command_value_;
-	res_ = PQexec(conn, command_exec_.c_str());
+	res_ = PQexec(conn_, command_exec_.c_str());
 	if(PQresultStatus(res_) != PGRES_COMMAND_OK)
 		throw PQresultErrorMessage(res_);
 }
