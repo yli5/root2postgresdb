@@ -30,7 +30,7 @@ private:
 
 	//command execution
 	std::string command_column_;
-	std::string commmand_value_;
+	std::string command_value_;
 	PGresult* res_;
 
 };
