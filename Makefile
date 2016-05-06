@@ -5,7 +5,7 @@
 BINARIES = root2postgres
 
 # objects to package into the shared library
-OBJECTS = TupleReader.o ColumnConfigParser.o
+OBJECTS = TupleReader.o ColumnConfigParser.o PostgresConnector.o
 
 # local directory settings and library name
 INCDIR = include
@@ -27,6 +27,9 @@ LDFLAGS += -L$(BOOST_LIBDIR) -Wl,-rpath,$(BOOST_LIBDIR) $(BOOST_LIBS)
 CERNROOT_ROOT = $(ROOTSYS)
 INCFLAGS += -I$(shell $(CERNROOT_ROOT)/bin/root-config --incdir)
 LDFLAGS += $(shell $(CERNROOT_ROOT)/bin/root-config --libs)
+
+INCFLAGS += -I/usr/pgsql-9.4/include
+LDFLAGS += -L/usr/pgsql-9.4/lib -lpq
 
 # build rules
 # -----------
