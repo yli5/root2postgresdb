@@ -45,13 +45,16 @@ class ColumnConfigParser {
       return var_types_;
     }
 
-    std::map<std::string, std::vector<std::string>> GetVarNames() const {
+    std::map<std::string, std::vector<std::string>> GetVarNamesMap() const {
       return var_names_;
     }
 
     std::map<std::string, std::string> GetVarLengths() const {
       return var_lengths_;
     }
+    
+    // Returns names of all variables in the config file
+    std::vector<std::string> GetVarNames() const;
 
   private:
     std::vector<std::string> var_types_;
