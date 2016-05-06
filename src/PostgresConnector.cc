@@ -17,7 +17,7 @@ PostgresConnector::~PostgresConnector(){
 	PQclear(res_);
 }
 
-void PostgresConnector::register(){
+void PostgresConnector::regis(){
 	command_column_ = "INSERT INTO " + table_name_ + "(";
 	command_value_ = " values (";
 }

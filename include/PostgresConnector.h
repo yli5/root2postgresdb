@@ -12,7 +12,7 @@ PostgresConnector() = default;
 PostgresConnector(std::string db_name, std::string table_name);
 ~PostgresConnector();
 
-void register();
+void regis();
 void insert(std::string column, std::string value);
 void exec();
 
