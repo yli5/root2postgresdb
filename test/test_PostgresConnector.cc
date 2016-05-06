@@ -1,6 +1,4 @@
-#include <TupleReader.h>
-#include <ColumnConfigParser.h>
-#include <PostgresConnector.h>
+#include "PostgresConnector.h"
 #include <string>
 #include <vector>
 #include <map>
