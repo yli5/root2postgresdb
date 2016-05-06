@@ -2,8 +2,7 @@
 # -----------------------
 
 # executables 
-#BINARIES = test_root2postgres
-BINARIES = example_usage
+BINARIES = example_usage tuplereader_ex1
 
 # local directory settings and library name
 INCDIR = ../include
