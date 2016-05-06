@@ -2,7 +2,8 @@
 # -----------------------
 
 # executables 
-BINARIES = test_root2postgres
+#BINARIES = test_root2postgres
+BINARIES = example_usage
 
 # local directory settings and library name
 INCDIR = ../include

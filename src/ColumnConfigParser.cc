@@ -104,7 +104,14 @@ ColumnConfigParser::ColumnConfigParser(const string &column_spec_fname) {
   }
 }
 
-
+// Return a vector containing names of all variables
+vector<string> ColumnConfigParser::GetVarNames() const {
+  vector<string> var_names;
+  for (const auto &t : var_types_) {
+    var_names.insert(var_names.end(), var_names_.at(t).begin(), var_names_.at(t).end());
+  }
+  return var_names;
+}
 
 
 
