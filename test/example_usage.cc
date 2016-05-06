@@ -1,5 +1,5 @@
-#include <TupleReader.h>
-#include <ColumnConfigParser.h>
+#include "TupleReader.h"
+#include "ColumnConfigParser.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -58,8 +58,8 @@ int main() {
     conn.regis();
     conn.insert("mcLen", tr.get("mcLen"));
     conn.insert("R2", tr.get("R2"));
-    conn.insert("mcLund", tr.get("mcLund"));
-    conn.insert("mcLund", tr.get("mcenergyCM"));
+    conn.insert("mcLund","'"+ tr.get("mcLund")+"'");
+    conn.insert("mcenergyCM","'"+ tr.get("mcenergyCM")+"'");
     conn.exec();
 
     idx++;

@@ -7,7 +7,7 @@
 // such variables exist in the ROOT file, it is handled by ROOT as
 // described in TupleReader.cc. 
 
-#include <ColumnConfigParser.h>
+#include "ColumnConfigParser.h"
 #include <fstream>
 #include <exception>
 #include <set>
