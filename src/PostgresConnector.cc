@@ -9,6 +9,7 @@ PostgresConnector::PostgresConnector(std::string db_name, std::string table_name
 	db_name_ = db_name;
 	table_name_ = table_name;
 	conn_ = PQsetdbLogin(pghost_, pgport_, pgoptions_, pgtty_, db_name_.c_str(), login_, pwd_);	
+	res_ = PQexec(conn_, command_column_.c_str());
 	if(PQstatus(conn_) != CONNECTION_OK)
 		throw PQerrorMessage(conn_);
 }
