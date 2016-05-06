@@ -29,13 +29,15 @@ void PostgresConnector::insert(std::string column, std::string value){
 }
 
 void PostgresConnector::exec(){
+	std::string command_exec_;
 	command_column_.pop_back();
 	command_value_.pop_back();
 	command_column_ += ")";
-	command_value_ += ");"
-	std::string command_exec_;
+	command_value_ += ");";
 	command_exec_ = command_column_ + command_value_;
 	res_ = PQexec(conn_, command_exec_.c_str());
+	command_column_.clear();
+	command_value_.clear();
 	if(PQresultStatus(res_) != PGRES_COMMAND_OK)
 		throw PQresultErrorMessage(res_);
 }
