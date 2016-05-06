@@ -38,11 +38,6 @@ using std::make_pair;
 
 // Constructor definition
 
-//TupleReader::TupleReader(vector<string> var_types,
-//                         map<string, vector<string>> var_names, 
-//                         map<string, string> var_lengths, 
-//                         string root_filename,
-//                         string root_treename)
 TupleReader::TupleReader(const string &root_filename,
                          const string &root_treename,
                          const ColumnConfigParser &ccp)

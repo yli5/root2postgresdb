@@ -31,11 +31,6 @@
 class TupleReader {
 
   public:
-    //TupleReader(std::vector<std::string> var_types, 
-    //            std::map<std::string, std::vector<std::string>> var_names,
-    //            std::map<std::string, std::string> var_lengths,
-    //            std::string root_filename,
-    //            std::string root_treename);
     TupleReader(const std::string &root_filename,
                 const std::string &root_treename,
                 const ColumnConfigParser &ccp);
