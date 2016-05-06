@@ -23,9 +23,10 @@
 #include <iostream>
 #include <utility>
 #include <exception>
+#include <algorithm>
 #include "TupleReader.h"
 
-//ROOT Headers
+//ROOT headers
 #include <TBranch.h>
 
 using std::cout;
@@ -37,16 +38,18 @@ using std::make_pair;
 
 // Constructor definition
 
-TupleReader::TupleReader(vector<string> var_types,
-                         map<string, vector<string>> var_names, 
-                         map<string, string> var_lengths, 
-                         string root_filename,
-                         string root_treename)
-    : var_types_(var_types), var_names_(var_names), var_lengths_(var_lengths) {
+TupleReader::TupleReader(const string &root_filename,
+                         const string &root_treename,
+                         const ColumnConfigParser &ccp)
+    : var_types_(ccp.GetVarTypes()), 
+      var_names_(ccp.GetVarNamesMap()), 
+      var_lengths_(ccp.GetVarLengths()) {
   root_file_ = new TFile(root_filename.c_str());
   root_tree_ = (TTree*) root_file_->Get(root_treename.c_str());
   current_event_idx_ = 0;
   num_events_ = root_tree_->GetEntries();
+  ss_.str("");
+  ss_.clear();
   SetAddresses();
 }
 
@@ -120,47 +123,135 @@ bool TupleReader::next_record() {
   return false;
 }
 
+string TupleReader::get(const string &var_name) const {
 
-// Accessors and their helper function, which performs checks to make sure that
+  // Deduce the type of the variable, throw exception
+  // if variable is not found.
+
+  string var_type;
+  vector<string> var_names;
+  bool is_found = false;
+
+  for (const auto &t : var_types_) {
+    var_names = var_names_.at(t);
+    std::sort(var_names.begin(), var_names.end());
+    is_found = std::binary_search(var_names.begin(), var_names.end(), var_name);
+    if (is_found) {
+      var_type = t;
+      break;
+    }
+  }
+
+  if (!is_found) 
+    throw std::invalid_argument("TupleReader::get error: no such variable.");
+
+  // Call the appropriate accessor based on type. 
+  
+  if (var_type == "int") {
+    return GetVarInt(var_name);
+
+  } else if (var_type == "float") {
+    return GetVarFloat(var_name);
+
+  } else if (var_type == "int[]") {
+    return GetVarVectorInts(var_name);
+
+  } else if (var_type == "float[]") {
+    return GetVarVectorFloats(var_name);
+
+  } else {
+    throw std::domain_error("TupleReader::get error: no such variable type.");
+  }
+}
+
+// Private accessors and their helper function, which performs checks to make sure that
 // the variable being accessed exists and is of the right type.
 
-int TupleReader::GetVarInt(const string &var_name) const {
-  if (var_values_int_.count(var_name) == 0)
+string TupleReader::GetVarInt(const string &var_name) const {
+
+  if (var_values_int_.count(var_name) == 0) {
     throw std::domain_error("GetVarInt error: "
                             "No such variable, only those in var_names are allowed.");
-  return var_values_int_.at(var_name);
+  }
+
+  return std::to_string(var_values_int_.at(var_name));
 }
 
-float TupleReader::GetVarFloat(const string &var_name) const {
-  if (var_values_float_.count(var_name) == 0)
+string TupleReader::GetVarFloat(const string &var_name) const {
+
+  if (var_values_float_.count(var_name) == 0) {
     throw std::domain_error("GetVarFloat error: "
                             "No such variable, only those in var_names are allowed.");
-  return var_values_float_.at(var_name);
+  }
+
+  // Write the float to ss_
+  ss_.precision(10);
+  ss_ << var_values_float_.at(var_name);
+  string output = ss_.str();
+
+  // Clear stringstream object
+  ss_.str("");
+  ss_.clear();
+
+  return output; 
 }
 
-vector<int> TupleReader::GetVarVectorInts(const string &var_name) const {
-  if (var_values_vec_ints_.count(var_name) == 0)
+string TupleReader::GetVarVectorInts(const string &var_name) const {
+
+  if (var_values_vec_ints_.count(var_name) == 0) {
     throw std::domain_error("GetVarVectorInts error: "
                             "No such variable, only those in var_names are allowed.");
+  }
+
+  // Get the vector and shrink to fit
   vector<int> var_vector = var_values_vec_ints_.at(var_name);
   var_vector.resize(get_array_length(var_name));
-  return var_vector;
+
+  // Write to a string
+  string output = "{";
+  for (const auto &v : var_vector) {
+    output += std::to_string(v) + ",";
+  }
+  output.pop_back();
+  output += "}";
+
+  return output;
 }
 
-vector<float> TupleReader::GetVarVectorFloats(const string &var_name) const {
-  if (var_values_vec_floats_.count(var_name) == 0)
+string TupleReader::GetVarVectorFloats(const string &var_name) const {
+
+  if (var_values_vec_floats_.count(var_name) == 0) {
     throw std::domain_error("GetVarVectorFloats error: "
                             "No such variable, only those in var_names are allowed.");
+  }
+
+  // Get the vector and shrink to fit
   vector<float> var_vector = var_values_vec_floats_.at(var_name);
   var_vector.resize(get_array_length(var_name));
-  return var_vector;
+
+  // Write to ss_ and convert to string
+  ss_.precision(10);
+  ss_ << "{";
+  for (const auto &v : var_vector) {
+    ss_ << v;
+    ss_ <<  ",";
+  }
+  string output = ss_.str();
+  output.pop_back();
+  output += "}";
+
+  // Clear stringstream object
+  ss_.str("");
+  ss_.clear();
+
+  return output;
 }
 
 size_t TupleReader::get_array_length(const string &var_name) const {
   if (var_lengths_.count(var_name) == 0)
     throw std::domain_error("get_array_length error: "
                             "No such array variable, it must exist in var_lengths.");
-  int var_length = GetVarInt(var_lengths_.at(var_name));
+  int var_length = std::stoi(GetVarInt(var_lengths_.at(var_name)));
   if (var_length < 0)
     throw std::length_error("get_array_length error: "
                             "The variable has negative length.");

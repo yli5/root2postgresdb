@@ -18,20 +18,22 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <sstream>
 
-//ROOT Headers
+//ROOT headers
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TTree.h>
 
+// Custom class headers
+#include "ColumnConfigParser.h"
+
 class TupleReader {
 
   public:
-    TupleReader(std::vector<std::string> var_types, 
-                std::map<std::string, std::vector<std::string>> var_names,
-                std::map<std::string, std::string> var_lengths,
-                std::string root_filename,
-                std::string root_treename);
+    TupleReader(const std::string &root_filename,
+                const std::string &root_treename,
+                const ColumnConfigParser &ccp);
     ~TupleReader();
 
     // next_record() is a wrapper of the TTree::GetEntry(i) function,
@@ -41,14 +43,18 @@ class TupleReader {
     
     bool next_record();
 
-    // Accessors for the variables, currently only 4 supported types.
-    
-    int GetVarInt(const std::string &var_name) const;
-    float GetVarFloat(const std::string &var_name) const;
-    std::vector<int> GetVarVectorInts(const std::string &var_name) const;
-    std::vector<float> GetVarVectorFloats(const std::string &var_name) const;
+    // get() is a public accessor for variable values; 
+    // it returns the value as a string for all 4 data types.
+    //
+    // Example: int - "4", float - "3.1392300000",
+    //          int[] - "{3,2,1}",
+    //          float[] - "{3.2148290000, 0.2143900000}"
+    //
+    std::string get(const std::string &var_name) const;
 
   private:
+    // For more information about private section, see
+    // TupleReader.cc
     TFile *root_file_;
     TTree *root_tree_;
 
@@ -65,6 +71,13 @@ class TupleReader {
     int num_events_ = 0;
 
     void SetAddresses();
+
+    mutable std::stringstream ss_;
+    
+    std::string GetVarInt(const std::string &var_name) const;
+    std::string GetVarFloat(const std::string &var_name) const;
+    std::string GetVarVectorInts(const std::string &var_name) const;
+    std::string GetVarVectorFloats(const std::string &var_name) const;
     size_t get_array_length(const std::string &var_name) const;
 };
 
