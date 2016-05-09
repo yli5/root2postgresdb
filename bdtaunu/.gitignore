@@ -1,0 +1,5 @@
+bdtaunu_root2postgres
+*.o
+*.so
+*.a
+.d
