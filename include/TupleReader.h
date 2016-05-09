@@ -33,7 +33,8 @@ class TupleReader {
   public:
     TupleReader(const std::string &root_filename,
                 const std::string &root_treename,
-                const ColumnConfigParser &ccp);
+                const ColumnConfigParser &ccp,
+                const size_t MaxArraySize);
     ~TupleReader();
 
     // next_record() is a wrapper of the TTree::GetEntry(i) function,
@@ -57,6 +58,7 @@ class TupleReader {
     // TupleReader.cc
     TFile *root_file_;
     TTree *root_tree_;
+    const size_t kMaxArraySize;
 
     std::vector<std::string> var_types_;
     std::map<std::string, std::vector<std::string>> var_names_;

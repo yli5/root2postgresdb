@@ -1,5 +1,7 @@
 CREATE TABLE event (
   eid                         bigserial PRIMARY KEY,
+  run                         int,
+  mode_label                  int,
   runNumber                   int,
   platform                    int,
   partition                   int,

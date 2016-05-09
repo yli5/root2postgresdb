@@ -59,8 +59,6 @@ PostgresConnector::PostgresConnector(string db_name,
   stmt_command.pop_back();
   stmt_command += ");";
 
-  std::cout << stmt_command << std::endl;
-
   // Prepare the statement
   res_ = PQprepare(conn_, stmt_name_.c_str(), stmt_command.c_str(), 
                    num_vars_, nullptr);
@@ -98,6 +96,7 @@ void PostgresConnector::bind(string var_name, string var_value) {
 // The exec() method fills in the param_values_, which is the type required by 
 // PQexecPrepared, and performs the insertion. 
 void PostgresConnector::exec(){
+
   // Fill in param_values_ to values stored in param_values_vector
   for (size_t i = 0; i < num_vars_; ++i) {
     param_values_[i] = param_values_vector_[i].c_str();
