@@ -203,9 +203,10 @@ string TupleReader::GetVarVectorInts(const string &var_name) const {
                             "No such variable, only those in var_names are allowed.");
   }
 
-  // Get the vector and shrink to fit
+  // Get the vector and shrink to fit, if it's empty, return "{}"
   vector<int> var_vector = var_values_vec_ints_.at(var_name);
   var_vector.resize(get_array_length(var_name));
+  if (var_vector.empty()) return "{}";
 
   // Write to a string
   string output = "{";
@@ -228,6 +229,7 @@ string TupleReader::GetVarVectorFloats(const string &var_name) const {
   // Get the vector and shrink to fit
   vector<float> var_vector = var_values_vec_floats_.at(var_name);
   var_vector.resize(get_array_length(var_name));
+  if (var_vector.empty()) return "{}";
 
   // Write to ss_ and convert to string
   ss_.precision(10);

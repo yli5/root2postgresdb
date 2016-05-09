@@ -6,7 +6,9 @@
 #include <chrono>
 #include <algorithm>
 
+#include <ColumnConfigParser.h>
 #include <TupleReader.h>
+#include <PostgresConnector.h>
 
 #include <boost/program_options.hpp>
 
@@ -112,33 +114,34 @@ void root2postgres(const po::variables_map &vm) {
   std::cout << cernroot_fname << std::endl;
   std::cout << cernroot_trname << std::endl;
 
-  /** Ideal usage example pseudo code 
-
   // parse column configuration
-  ColumnConfigParser col_config(column_spec_fname);
+  ColumnConfigParser ccp(column_spec_fname);
+  std::vector<std::string> var_names = ccp.GetVarNames();
 
   // open root file
-  TupleReader tuple_reader(cernroot_fname, cernroot_trname, col_config);
+  TupleReader tuple_reader(cernroot_fname, cernroot_trname, ccp);
 
   // open postgres connection
-  PostgresConnector conn(posgres_dbname, postgres_tblname, col_config);
+  PostgresConnector conn(postgres_dbname, postgres_tblname, var_names);
 
   // stream over each event in the root file
+  std::cout << "Inserting " << cernroot_fname << "..." << std::endl;
   while (tuple_reader.next_record()) {
 
-    // for each event, manually insert each column by name
-    conn.insert("mcLen", tuple_reader.get("mcLen"));
-    conn.insert("R2", tuple_reader.get("R2"));
-    conn.insert("mcLund", tuple_reader.get("mcLund"));
-    conn.insert("mcenergycm", tuple_reader.get("mcenergycm"));
+    // for each event, insert all variables defined in the 
+    // column spec file
+    for (const auto &v : var_names) {
+      conn.bind(v, tuple_reader.get(v));
+    }
+    conn.exec();
 
-    // or, possibly use the column configuration object...
-    // for (each column name 'colname' in col_config) {
-    //   conn.insert(colname, tuple_reader.get(colname));
-    // }
+    //// for each event, manually insert each column by name
+    //conn.bind("mcLen", tuple_reader.get("mcLen"));
+    //conn.bind("R2", tuple_reader.get("R2"));
+    //conn.bind("mcLund", tuple_reader.get("mcLund"));
+    //conn.bind("mcenergycm", tuple_reader.get("mcenergycm"));
+    //conn.exec();
   }
-
-  */
 
   return;
 

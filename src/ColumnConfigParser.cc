@@ -40,7 +40,7 @@ ColumnConfigParser::ColumnConfigParser(const string &column_spec_fname) {
   while (std::getline(fs, line)) {
 
     // Tokenize each line and validiate the 2-column format
-    boost::split(contents, line, boost::is_any_of(" "));
+    boost::split(contents, line, boost::is_any_of(" \t"), boost::token_compress_on);
     if (contents.size() != 2)
       throw std::domain_error("Column spec file does not contain "
                               "exactly 2 columns. ");
