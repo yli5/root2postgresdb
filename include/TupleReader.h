@@ -18,6 +18,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <sstream>
 
 //ROOT headers
@@ -63,11 +64,12 @@ class TupleReader {
     std::vector<std::string> var_types_;
     std::map<std::string, std::vector<std::string>> var_names_;
     std::map<std::string, std::string> var_lengths_;
+    std::unordered_map<std::string, std::string> var_name_to_type_map_;
 
     std::map<std::string, int> var_values_int_;
     std::map<std::string, float> var_values_float_;
     std::map<std::string, std::vector<int>> var_values_vec_ints_;
-    std::map<std::string, std::vector<float>> var_values_vec_floats_;
+    std::unordered_map<std::string, std::vector<float>> var_values_vec_floats_;
 
     int current_event_idx_ = 0;
     int num_events_ = 0;
@@ -75,6 +77,7 @@ class TupleReader {
     void SetAddresses();
 
     mutable std::stringstream ss_;
+    mutable std::string var_type_;
     
     std::string GetVarInt(const std::string &var_name) const;
     std::string GetVarFloat(const std::string &var_name) const;

@@ -12,7 +12,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <libpq-fe.h>
 
 class PostgresConnector{
@@ -54,7 +54,7 @@ private:
   std::string stmt_name_;
 
   //variables
-  std::vector<std::string> var_names_;
+  std::unordered_map<std::string, size_t> var_name_to_idx_map_;
   size_t num_vars_;
   std::vector<std::string> param_values_vector_;
   std::vector<std::string>::iterator var_position_iter_;

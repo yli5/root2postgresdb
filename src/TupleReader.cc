@@ -47,16 +47,16 @@ TupleReader::TupleReader(const string &root_filename,
       var_names_(ccp.GetVarNamesMap()), 
       var_lengths_(ccp.GetVarLengths()) {
 
-  // Sort the variable names to facilitate search later
-  for (const auto &t : var_types_) {
-    std::sort(var_names_.at(t).begin(), var_names_.at(t).end());
-  }
-
   // Initialize data members
   root_file_ = new TFile(root_filename.c_str());
   root_tree_ = (TTree*) root_file_->Get(root_treename.c_str());
   current_event_idx_ = 0;
   num_events_ = root_tree_->GetEntries();
+  for (const auto &t : var_types_) {
+    for (const auto &v : var_names_.at(t)) {
+      var_name_to_type_map_.insert(std::make_pair(v, t));
+    }
+  }
 
   ss_.str("");
   ss_.clear();
@@ -136,37 +136,21 @@ bool TupleReader::next_record() {
 
 string TupleReader::get(const string &var_name) const {
 
-  // Deduce the type of the variable, throw exception
-  // if variable is not found.
-
-  string var_type;
-  vector<string> var_names;
-  bool is_found = false;
-
-  for (const auto &t : var_types_) {
-    var_names = var_names_.at(t);
-    is_found = std::binary_search(var_names.begin(), var_names.end(), var_name);
-    if (is_found) {
-      var_type = t;
-      break;
-    }
-  }
-
-  if (!is_found) 
-    throw std::invalid_argument("TupleReader::get error: no such variable.");
+  // Deduce the type of the variable
+  var_type_ = var_name_to_type_map_.at(var_name);
 
   // Call the appropriate accessor based on type. 
   
-  if (var_type == "int") {
+  if (var_type_ == "int") {
     return GetVarInt(var_name);
 
-  } else if (var_type == "float") {
+  } else if (var_type_ == "float") {
     return GetVarFloat(var_name);
 
-  } else if (var_type == "int[]") {
+  } else if (var_type_ == "int[]") {
     return GetVarVectorInts(var_name);
 
-  } else if (var_type == "float[]") {
+  } else if (var_type_ == "float[]") {
     return GetVarVectorFloats(var_name);
 
   } else {
