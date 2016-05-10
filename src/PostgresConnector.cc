@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <utility>
 #include <exception>
-#include <map>
 #include <libpq-fe.h>
 #include "PostgresConnector.h"
 
@@ -25,12 +25,13 @@ exit_nicely(PGconn *conn) {
 PostgresConnector::PostgresConnector(string db_name, 
                                      string table_name,
                                      vector<string> var_names)
-    : var_names_(var_names), 
-      num_vars_(var_names.size()),
+    : num_vars_(var_names.size()),
       param_values_vector_(vector<string>(var_names.size(), "DEFAULT")) {
 
-  // Sort the var_names_ so searching will be faster later
-  std::sort(var_names_.begin(), var_names_.end());
+  // Initialize map to hold variable indexes
+  for (size_t i = 0; i < num_vars_; ++i) {
+    var_name_to_idx_map_.insert(std::make_pair(var_names[i], i));
+  }
 
   // Allocate the array to hold variable values
   param_values_ = new const char*[num_vars_];
@@ -48,7 +49,7 @@ PostgresConnector::PostgresConnector(string db_name,
   // Construct command to be passed preparing the statement 
   stmt_name_ = "PREPARE_DATA_FOR_INSERT";
   string stmt_command = "INSERT INTO " + table_name + " (";
-  for (const auto &n : var_names_) {
+  for (const auto &n : var_names) {
     stmt_command += n + ",";
   }
   stmt_command.pop_back();
@@ -79,18 +80,8 @@ PostgresConnector::~PostgresConnector(){
 // in the param_values_vector_ to be pointed at by param_values_ later
 void PostgresConnector::bind(const string &var_name, const string &var_value) {
 
-  // Look for the var_name and get its index
-  var_position_iter_ = std::lower_bound(var_names_.begin(), var_names_.end(), var_name);
-  if ((var_position_iter_ != var_names_.end()) && 
-      !(var_name < *var_position_iter_)) {
-    var_idx_ = var_position_iter_ - var_names_.begin();
-  }
-  else {
-    throw std::invalid_argument("PostgresConnector::bind error: unspecified variable." );
-  }
-
   // Set the appropriate element in param_values_vector_ 
-  param_values_vector_[var_idx_] = var_value;
+  param_values_vector_.at(var_name_to_idx_map_.at(var_name)) = var_value;
 }
 
 // The exec() method fills in the param_values_, which is the type required by 
@@ -102,7 +93,7 @@ void PostgresConnector::exec(){
     param_values_[i] = param_values_vector_[i].c_str();
   }
   // Execute the statement
-	res_ = PQexecPrepared(conn_, stmt_name_.c_str(), num_vars_, param_values_, nullptr, nullptr, 0);
+  res_ = PQexecPrepared(conn_, stmt_name_.c_str(), num_vars_, param_values_, nullptr, nullptr, 0);
   if (PQresultStatus(res_) != PGRES_COMMAND_OK) {
     std::cerr << "Executing prepared failed: " << PQerrorMessage(conn_);
     PQclear(res_);
