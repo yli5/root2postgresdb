@@ -30,7 +30,7 @@ public:
 
   // The bind function stores the value of the variable
   // in a vector.
-  void bind(std::string var_name, std::string var_value);
+  void bind(const std::string &var_name, const std::string &var_value);
 
   // The exec function performs the insertion of the 
   // variable values that were bound by the bind function

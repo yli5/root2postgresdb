@@ -1,5 +1,5 @@
 # Unit tests
-BINARIES := bdtaunu_root2postgres
+BINARIES := bdtaunu_root2postgres benchmark
 
 # additional include and library search paths
 ROOT2POSTGRES_ROOT = ../
