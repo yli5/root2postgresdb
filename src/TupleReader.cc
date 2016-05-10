@@ -46,12 +46,21 @@ TupleReader::TupleReader(const string &root_filename,
       var_types_(ccp.GetVarTypes()), 
       var_names_(ccp.GetVarNamesMap()), 
       var_lengths_(ccp.GetVarLengths()) {
+
+  // Sort the variable names to facilitate search later
+  for (const auto &t : var_types_) {
+    std::sort(var_names_.at(t).begin(), var_names_.at(t).end());
+  }
+
+  // Initialize data members
   root_file_ = new TFile(root_filename.c_str());
   root_tree_ = (TTree*) root_file_->Get(root_treename.c_str());
   current_event_idx_ = 0;
   num_events_ = root_tree_->GetEntries();
+
   ss_.str("");
   ss_.clear();
+
   SetAddresses();
 }
 
@@ -136,7 +145,6 @@ string TupleReader::get(const string &var_name) const {
 
   for (const auto &t : var_types_) {
     var_names = var_names_.at(t);
-    std::sort(var_names.begin(), var_names.end());
     is_found = std::binary_search(var_names.begin(), var_names.end(), var_name);
     if (is_found) {
       var_type = t;
@@ -206,19 +214,19 @@ string TupleReader::GetVarVectorInts(const string &var_name) const {
   }
 
   // Get the vector and shrink to fit, if it's empty, return "{}"
-  vector<int> var_vector = var_values_vec_ints_.at(var_name);
-  var_vector.resize(get_array_length(var_name));
-  if (var_vector.empty()) 
+  const vector<int> &var_vector_ref = var_values_vec_ints_.at(var_name);
+  size_t var_size = get_array_length(var_name);
+  if (var_size == 0) 
     return "{}";
-  else if (var_vector.size() > kMaxArraySize) {
+  else if (var_size > kMaxArraySize) {
     throw std::out_of_range("TupleReader error: array variable size exceeds max "
                             "array size kMaxArraySize. ");
   }
 
   // Write to a string
   string output = "{";
-  for (const auto &v : var_vector) {
-    output += std::to_string(v) + ",";
+  for (size_t i = 0; i < var_size; ++i) {
+    output += std::to_string(var_vector_ref[i]) + ",";
   }
   output.pop_back();
   output += "}";
@@ -234,11 +242,11 @@ string TupleReader::GetVarVectorFloats(const string &var_name) const {
   }
 
   // Get the vector and shrink to fit
-  vector<float> var_vector = var_values_vec_floats_.at(var_name);
-  var_vector.resize(get_array_length(var_name));
-  if (var_vector.empty()) 
+  const vector<float> &var_vector_ref = var_values_vec_floats_.at(var_name);
+  size_t var_size = get_array_length(var_name);
+  if (var_size == 0) 
     return "{}";
-  else if (var_vector.size() > kMaxArraySize) {
+  else if (var_size > kMaxArraySize) {
     throw std::out_of_range("TupleReader error: array variable size exceeds max "
                             "array size kMaxArraySize. ");
   }
@@ -246,8 +254,8 @@ string TupleReader::GetVarVectorFloats(const string &var_name) const {
   // Write to ss_ and convert to string
   ss_.precision(10);
   ss_ << "{";
-  for (const auto &v : var_vector) {
-    ss_ << v;
+  for (size_t i = 0; i < var_size; ++i) {
+    ss_ << var_vector_ref[i];
     ss_ <<  ",";
   }
   string output = ss_.str();

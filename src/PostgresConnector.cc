@@ -77,12 +77,12 @@ PostgresConnector::~PostgresConnector(){
 
 // The bind method puts the value of the variable into the correct index
 // in the param_values_vector_ to be pointed at by param_values_ later
-void PostgresConnector::bind(string var_name, string var_value) {
+void PostgresConnector::bind(const string &var_name, const string &var_value) {
 
   // Look for the var_name and get its index
   var_position_iter_ = std::lower_bound(var_names_.begin(), var_names_.end(), var_name);
   if ((var_position_iter_ != var_names_.end()) && 
-      (*var_position_iter_ == var_name)) {
+      !(var_name < *var_position_iter_)) {
     var_idx_ = var_position_iter_ - var_names_.begin();
   }
   else {
