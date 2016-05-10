@@ -37,6 +37,8 @@ int main(int argc, char **argv) {
 
         ("column_spec_fname", po::value<std::string>(), "Column configuration file. ")
 
+        ("run", po::value<std::string>(), "Run number (1-6) ")
+        ("mode_label", po::value<std::string>(), "SP mode for MC, on/offpeak for data. ")
     ;
 
     po::options_description hidden("Hidden options");
@@ -107,22 +109,28 @@ void root2postgres(const po::variables_map &vm) {
   std::string cernroot_fname = vm["cernroot_fname"].as<std::string>();
   std::string cernroot_trname = vm["cernroot_trname"].as<std::string>();
   std::string column_spec_fname = vm["column_spec_fname"].as<std::string>();
+  std::string run = vm["run"].as<std::string>();
+  std::string mode_label = vm["mode_label"].as<std::string>();
 
   // print
-  std::cout << postgres_dbname << std::endl;
-  std::cout << postgres_tblname << std::endl;
-  std::cout << cernroot_fname << std::endl;
-  std::cout << cernroot_trname << std::endl;
+  //std::cout << postgres_dbname << std::endl;
+  //std::cout << postgres_tblname << std::endl;
+  //std::cout << cernroot_fname << std::endl;
+  //std::cout << cernroot_trname << std::endl;
 
   // parse column configuration
   ColumnConfigParser ccp(column_spec_fname);
   std::vector<std::string> var_names = ccp.GetVarNames();
+  std::vector<std::string> usr_var_names = {"run", 
+                                            "mode_label"};
 
   // open root file
   TupleReader tuple_reader(cernroot_fname, cernroot_trname, ccp, 800);
 
   // open postgres connection
-  PostgresConnector conn(postgres_dbname, postgres_tblname, var_names);
+  std::vector<std::string> all_var_names = usr_var_names;
+  all_var_names.insert(all_var_names.end(), var_names.begin(), var_names.end());
+  PostgresConnector conn(postgres_dbname, postgres_tblname, all_var_names);
 
   // stream over each event in the root file
   std::cout << "Inserting " << cernroot_fname << "..." << std::endl;
@@ -133,6 +141,9 @@ void root2postgres(const po::variables_map &vm) {
     for (const auto &v : var_names) {
       conn.bind(v, tuple_reader.get(v));
     }
+    conn.bind("run", run);
+    conn.bind("mode_label", mode_label);
+
     conn.exec();
 
     //// for each event, manually insert each column by name

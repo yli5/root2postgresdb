@@ -40,8 +40,10 @@ using std::make_pair;
 
 TupleReader::TupleReader(const string &root_filename,
                          const string &root_treename,
-                         const ColumnConfigParser &ccp)
-    : var_types_(ccp.GetVarTypes()), 
+                         const ColumnConfigParser &ccp,
+                         const size_t MaxArraySize = 1000)
+    : kMaxArraySize(MaxArraySize), 
+      var_types_(ccp.GetVarTypes()), 
       var_names_(ccp.GetVarNamesMap()), 
       var_lengths_(ccp.GetVarLengths()) {
   root_file_ = new TFile(root_filename.c_str());
@@ -76,28 +78,28 @@ void TupleReader::SetAddresses() {
     for (auto v : var_names_[t]) {
       if (t == "int") {
         var_values_int_.insert(make_pair(v, 0));
-        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_int_[v])
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_int_.at(v))
             == TTree::ESetBranchAddressStatus::kMissingBranch) {
           throw std::invalid_argument("TupleReader error: no corresponding "
                                    "branch in the ROOT file. ");
         }
       } else if (t == "float") {
         var_values_float_.insert(make_pair(v, 0.));
-        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_float_[v])
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_float_.at(v))
             == TTree::ESetBranchAddressStatus::kMissingBranch) {
           throw std::invalid_argument("TupleReader error: no corresponding "
                                    "branch in the ROOT file. ");
         }
       } else if (t == "int[]") {
-        var_values_vec_ints_.insert(make_pair(v, vector<int>(500)));
-        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_ints_[v][0])
+        var_values_vec_ints_.insert(make_pair(v, vector<int>(kMaxArraySize)));
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_ints_.at(v)[0])
             == TTree::ESetBranchAddressStatus::kMissingBranch) {
           throw std::invalid_argument("TupleReader error: no corresponding "
                                    "branch in the ROOT file. ");
         }
       } else if (t == "float[]") {
-        var_values_vec_floats_.insert(make_pair(v, vector<float>(500)));
-        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_floats_[v][0])
+        var_values_vec_floats_.insert(make_pair(v, vector<float>(kMaxArraySize)));
+        if (root_tree_->SetBranchAddress(v.c_str(), &var_values_vec_floats_.at(v)[0])
             == TTree::ESetBranchAddressStatus::kMissingBranch) {
           throw std::invalid_argument("TupleReader error: no corresponding "
                                    "branch in the ROOT file. ");
@@ -203,9 +205,15 @@ string TupleReader::GetVarVectorInts(const string &var_name) const {
                             "No such variable, only those in var_names are allowed.");
   }
 
-  // Get the vector and shrink to fit
+  // Get the vector and shrink to fit, if it's empty, return "{}"
   vector<int> var_vector = var_values_vec_ints_.at(var_name);
   var_vector.resize(get_array_length(var_name));
+  if (var_vector.empty()) 
+    return "{}";
+  else if (var_vector.size() > kMaxArraySize) {
+    throw std::out_of_range("TupleReader error: array variable size exceeds max "
+                            "array size kMaxArraySize. ");
+  }
 
   // Write to a string
   string output = "{";
@@ -228,6 +236,12 @@ string TupleReader::GetVarVectorFloats(const string &var_name) const {
   // Get the vector and shrink to fit
   vector<float> var_vector = var_values_vec_floats_.at(var_name);
   var_vector.resize(get_array_length(var_name));
+  if (var_vector.empty()) 
+    return "{}";
+  else if (var_vector.size() > kMaxArraySize) {
+    throw std::out_of_range("TupleReader error: array variable size exceeds max "
+                            "array size kMaxArraySize. ");
+  }
 
   // Write to ss_ and convert to string
   ss_.precision(10);

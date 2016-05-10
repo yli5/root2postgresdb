@@ -21,7 +21,7 @@ int main() {
   ColumnConfigParser ccp = ColumnConfigParser(column_config_fname);
 
   // Instantiate a TupleReader object.
-  TupleReader tr(root_filename, root_treename, ccp);
+  TupleReader tr(root_filename, root_treename, ccp, 800);
 
 
   // Loop through every event in the ROOT file and for each event,
