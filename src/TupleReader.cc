@@ -201,19 +201,19 @@ string TupleReader::GetVarVectorInts(const string &var_name) const {
   const vector<int> &var_vector_ref = var_values_vec_ints_.at(var_name);
   size_t var_size = get_array_length(var_name);
   if (var_size == 0) 
-    return "{}";
+    return "'{}'";
   else if (var_size > kMaxArraySize) {
     throw std::out_of_range("TupleReader error: array variable size exceeds max "
                             "array size kMaxArraySize. ");
   }
 
   // Write to a string
-  string output = "{";
+  string output = "'{";
   for (size_t i = 0; i < var_size; ++i) {
     output += std::to_string(var_vector_ref[i]) + ",";
   }
   output.pop_back();
-  output += "}";
+  output += "}'";
 
   return output;
 }
@@ -229,7 +229,7 @@ string TupleReader::GetVarVectorFloats(const string &var_name) const {
   const vector<float> &var_vector_ref = var_values_vec_floats_.at(var_name);
   size_t var_size = get_array_length(var_name);
   if (var_size == 0) 
-    return "{}";
+    return "'{}'";
   else if (var_size > kMaxArraySize) {
     throw std::out_of_range("TupleReader error: array variable size exceeds max "
                             "array size kMaxArraySize. ");
@@ -237,14 +237,14 @@ string TupleReader::GetVarVectorFloats(const string &var_name) const {
 
   // Write to ss_ and convert to string
   ss_.precision(10);
-  ss_ << "{";
+  ss_ << "'{";
   for (size_t i = 0; i < var_size; ++i) {
     ss_ << var_vector_ref[i];
     ss_ <<  ",";
   }
   string output = ss_.str();
   output.pop_back();
-  output += "}";
+  output += "}'";
 
   // Clear stringstream object
   ss_.str("");

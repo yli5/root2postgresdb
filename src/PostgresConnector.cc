@@ -28,6 +28,11 @@ PostgresConnector::PostgresConnector(string db_name,
     : num_vars_(var_names.size()),
       param_values_vector_(vector<string>(var_names.size(), "DEFAULT")) {
 
+  // Check there is at least 1 variable to be inserted
+  if (num_vars_ == 0) {
+    throw std::domain_error("PostgresConnector error: no variable to insert. ");
+  }
+
   // Initialize map to hold variable indexes
   for (size_t i = 0; i < num_vars_; ++i) {
     var_name_to_idx_map_.insert(std::make_pair(var_names[i], i));
@@ -46,29 +51,29 @@ PostgresConnector::PostgresConnector(string db_name,
     exit_nicely(conn_);
   }
   
-  // Construct command to be passed preparing the statement 
-  stmt_name_ = "PREPARE_DATA_FOR_INSERT";
-  string stmt_command = "INSERT INTO " + table_name + " (";
+  //// Construct command to be passed preparing the statement 
+  //stmt_name_ = "PREPARE_DATA_FOR_INSERT";
+  stmt_ = "INSERT INTO " + table_name + " (";
   for (const auto &n : var_names) {
-    stmt_command += n + ",";
+    stmt_ += n + ",";
   }
-  stmt_command.pop_back();
-  stmt_command += ") VALUES (";
-  for (size_t i = 1; i <= num_vars_; ++i) {
-    stmt_command += "$" + std::to_string(i) + ",";
-  }
-  stmt_command.pop_back();
-  stmt_command += ");";
+  stmt_.pop_back();
+  stmt_ += ") VALUES ";
+  //for (size_t i = 1; i <= num_vars_; ++i) {
+  //  stmt_command += "$" + std::to_string(i) + ",";
+  //}
+  //stmt_command.pop_back();
+  //stmt_command += ");";
 
-  // Prepare the statement
-  res_ = PQprepare(conn_, stmt_name_.c_str(), stmt_command.c_str(), 
-                   num_vars_, nullptr);
-  if (PQresultStatus(res_) != PGRES_COMMAND_OK) {
-    std::cerr << "Prepare failed: " << PQerrorMessage(conn_);
-    PQclear(res_);
-    exit_nicely(conn_);
-  }
-  PQclear(res_);
+  //// Prepare the statement
+  //res_ = PQprepare(conn_, stmt_name_.c_str(), stmt_command.c_str(), 
+  //                 num_vars_, nullptr);
+  //if (PQresultStatus(res_) != PGRES_COMMAND_OK) {
+  //  std::cerr << "Prepare failed: " << PQerrorMessage(conn_);
+  //  PQclear(res_);
+  //  exit_nicely(conn_);
+  //}
+  //PQclear(res_);
 }
 
 PostgresConnector::~PostgresConnector(){
@@ -84,18 +89,30 @@ void PostgresConnector::bind(const string &var_name, const string &var_value) {
   param_values_vector_.at(var_name_to_idx_map_.at(var_name)) = var_value;
 }
 
-// The exec() method fills in the param_values_, which is the type required by 
-// PQexecPrepared, and performs the insertion. 
-void PostgresConnector::exec(){
-
-  // Fill in param_values_ to values stored in param_values_vector
-  for (size_t i = 0; i < num_vars_; ++i) {
-    param_values_[i] = param_values_vector_[i].c_str();
+string PostgresConnector::GetRowAsString() {
+  string output = "(";
+  for (const auto &v : param_values_vector_) {
+    output += v + ",";
   }
+  output.pop_back(); // param_values_vector_ is guarenteed to have size > 0 (line 31)
+  output += ")";
+
+  return output;
+}
+
+// The insert() method takes in a vector of strings that need to be
+// concatenated into a statement and calls PQexec to insert
+void PostgresConnector::insert(const vector<string> &record_values_vector){
+  string command_stmt = stmt_;
+  for (const auto &v : record_values_vector) {
+    command_stmt += v + ",";
+  }
+  command_stmt.back() = ';';
+
   // Execute the statement
-  res_ = PQexecPrepared(conn_, stmt_name_.c_str(), num_vars_, param_values_, nullptr, nullptr, 0);
+  res_ = PQexec(conn_, command_stmt.c_str());
   if (PQresultStatus(res_) != PGRES_COMMAND_OK) {
-    std::cerr << "Executing prepared failed: " << PQerrorMessage(conn_);
+    std::cerr << "Executing command failed: " << PQerrorMessage(conn_);
     PQclear(res_);
     exit_nicely(conn_);
   }
