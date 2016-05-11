@@ -32,10 +32,12 @@ public:
   // in a vector.
   void bind(const std::string &var_name, const std::string &var_value);
 
-  // The exec function performs the insertion of the 
-  // variable values that were bound by the bind function
-  // above.
-  void exec();
+  // The GetRowAsString function returns the current row as a string
+  std::string GetRowAsString();
+
+  // The insert function performs the insertion of the 
+  // rows passed in as a vector<string>
+  void insert(const std::vector<std::string> &record_values_vector);
 
 private:
 	//connector
@@ -51,7 +53,8 @@ private:
 
 	//command execution
 	PGresult *res_;
-  std::string stmt_name_;
+  //std::string stmt_name_;
+  std::string stmt_;
 
   //variables
   std::unordered_map<std::string, size_t> var_name_to_idx_map_;

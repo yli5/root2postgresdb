@@ -31,6 +31,8 @@ int main(int argc, char **argv) {
 
         ("postgres_dbname", po::value<std::string>(), "Postgres database name. ")
         ("postgres_tblname", po::value<std::string>(), "Postgres table name. ")
+        ("rows_per_insert", po::value<size_t>()->default_value(30), 
+         "Number of rows per insertion statement ")
 
         ("cernroot_fname", po::value<std::string>(), "ROOT file name. ")
         ("cernroot_trname", po::value<std::string>()->default_value("ntp1"), "ROOT TTree name. ")
@@ -106,6 +108,7 @@ void root2postgres(const po::variables_map &vm) {
   // read configuration file parameters
   std::string postgres_dbname = vm["postgres_dbname"].as<std::string>();
   std::string postgres_tblname = vm["postgres_tblname"].as<std::string>();
+  const size_t rows_per_insert = vm["rows_per_insert"].as<size_t>();
   std::string cernroot_fname = vm["cernroot_fname"].as<std::string>();
   std::string cernroot_trname = vm["cernroot_trname"].as<std::string>();
   std::string column_spec_fname = vm["column_spec_fname"].as<std::string>();
@@ -132,27 +135,40 @@ void root2postgres(const po::variables_map &vm) {
   all_var_names.insert(all_var_names.end(), var_names.begin(), var_names.end());
   PostgresConnector conn(postgres_dbname, postgres_tblname, all_var_names);
 
+  // initialize vector to hold the rows to be inserted
+  std::vector<std::string> record_values_vector;
+
   // stream over each event in the root file
   std::cout << "Inserting " << cernroot_fname << "..." << std::endl;
+  unsigned int evt_idx = 0;
   while (tuple_reader.next_record()) {
 
-    // for each event, insert all variables defined in the 
-    // column spec file
+    // Bind values of all variables in current record
+    // and append to vector holding rows to be inserted
     for (const auto &v : var_names) {
       conn.bind(v, tuple_reader.get(v));
     }
     conn.bind("run", run);
     conn.bind("mode_label", mode_label);
 
-    conn.exec();
-
     //// for each event, manually insert each column by name
     //conn.bind("mcLen", tuple_reader.get("mcLen"));
     //conn.bind("R2", tuple_reader.get("R2"));
     //conn.bind("mcLund", tuple_reader.get("mcLund"));
     //conn.bind("mcenergycm", tuple_reader.get("mcenergycm"));
-    //conn.exec();
+
+    record_values_vector.push_back(conn.GetRowAsString());
+
+    // Insert into database
+    if (evt_idx % rows_per_insert == 0) {
+      conn.insert(record_values_vector);
+      record_values_vector.clear();
+    }
+    ++evt_idx;
   }
+
+  // Insert any remaining rows
+  if (!record_values_vector.empty()) conn.insert(record_values_vector);
 
   return;
 
