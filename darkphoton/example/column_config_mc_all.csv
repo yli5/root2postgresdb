@@ -5,7 +5,6 @@ upperID int
 lowerID int
 majorID int
 configKey int
-date int
 ddate int
 eePx float
 eePy float
@@ -18,11 +17,6 @@ beamSCovXX float
 beamSCovYY float
 beamSCovZZ float
 beamSCovXZ float
-L3OutDch bool
-L30utEmc bool
-BGFTau bool
-BGFMultiHadron bool
-BGFNeutralHadro bool
 nTracks int
 nGoodTrkLoose int
 nNeutralCands int

@@ -1,5 +1,5 @@
-CREATE TABLE mcevent_2l(
-  eid          bigint DEFAULT nextval('eid_seq_2l'),
+CREATE TABLE mcevent_4l(
+  eid          bigint DEFAULT nextval('eid_seq_4l'),
   run			int,
   mode_label		int,
   runNumber		int,          
@@ -9,7 +9,6 @@ CREATE TABLE mcevent_2l(
   lowerID		int,          
   majorID		int,          
   configKey		int,
-  datee  int,          
   ddate		int,          
   eePx		real,        
   eePy		real,        
@@ -22,11 +21,6 @@ CREATE TABLE mcevent_2l(
   beamSCovYY		real,        
   beamSCovZZ		real,        
   beamSCovXZ		real,
-  L3OutDch  bool,
-  L30utEmc  bool,
-  BGFTau  bool,
-  BGFMultiHadron  bool,
-  BGFNeutralHadro  bool,        
   nTracks		int,          
   nGoodTrkLoose		int,          
   nNeutralCands		int,          
