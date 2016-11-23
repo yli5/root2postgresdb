@@ -1,5 +1,5 @@
-CREATE TABLE event (
-  eid          bigint DEFAULT nextval('eid_seq'),
+CREATE TABLE background (
+  eid          bigint DEFAULT nextval('eid_seq_background'),
   run                   int,
   mode_label            int,
 runNumber int,
@@ -9,7 +9,6 @@ upperID int,
 lowerID int,
 majorID int,
 configKey int,
-datee int,
 ddate int,
 eePx real,
 eePy real,
