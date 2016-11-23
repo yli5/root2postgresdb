@@ -30,7 +30,7 @@ thrustCosTh float
 thrustPhi float
 sphericityAll float
 nups int
-upsChi2 float
+upsChi2 float[nups]
 upsMass float[nups]
 upsMassErr float[nups]
 upsVtxx float[nups]
