@@ -1,3 +1,8 @@
+drop sequence if exists eid_seq_background;
+drop table if exists background;
+
+create sequence eid_seq_background;
+
 CREATE TABLE background (
   eid          bigint DEFAULT nextval('eid_seq_background'),
   run                   int,

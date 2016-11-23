@@ -5,7 +5,6 @@ upperID int
 lowerID int
 majorID int
 configKey int
-date int
 ddate int
 eePx float
 eePy float
