@@ -1,5 +1,5 @@
-drop sequence if exists eid_seq_background;
 drop table if exists background;
+drop sequence if exists eid_seq_background;
 
 create sequence eid_seq_background;
 
